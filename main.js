@@ -118,6 +118,38 @@ class ImageDataManager {
 
 
 //Functions
+const normalizeImageData2 = (input, output) => {
+    let le_maximum = 0;
+    let le_minimum = 255;
+
+    input.forEach((pixel, x, y) => {
+        //Determine which channel has the highest value in the pixel.   
+        const le_rgb_du_pixel = pixel.getRGB();
+        const le_maximum_du_pixel = Math.max(...le_rgb_du_pixel);
+
+        //Determine if it's either smaller than the minimum or greater
+        //than the maximum.
+        le_maximum = le_maximum_du_pixel > le_maximum? 
+            le_maximum_du_pixel : le_maximum;
+        le_minimum = le_maximum_du_pixel < le_minimum?
+            le_maximum_du_pixel : le_minimum;
+    });
+
+    //Calculate the range of the pixel distribution.
+    const la_amplitude = le_maximum - le_minimum; 
+
+    //Normalize the pixel data according to the calculated range.
+    input.forEach((pixel, x, y) => {
+        output.setPixel(
+            x, y,
+            Math.round(((pixel.getRed() - le_minimum + 0.0) / la_amplitude) * 255.0),
+            Math.round(((pixel.getGreen() - le_minimum + 0.0) / la_amplitude) * 255.0),
+            Math.round(((pixel.getBlue() - le_minimum + 0.0) / la_amplitude) * 255.0),
+            pixel.getAlpha()
+        );
+    });
+};
+
 const normalizeImageData = (input, output) => {
     let le_minimum_pour_rouge = 255;
     let le_minimum_pour_vert = 255;
@@ -190,7 +222,7 @@ const drawImage = image => {
         )
     );
 
-    normalizeImageData(
+    normalizeImageData2(
         le_directeur_pour_la_image,
         le_directeur_pour_la_image2
     );
@@ -199,25 +231,6 @@ const drawImage = image => {
         le_directeur_pour_la_image2.getImageData(),
         0, 0
     );
-
-    //Secondary canvas test---
-    //const c2 = document.getElementById('canvas-alt');
-    //const ctx2 = c2.getContext('2d');
-
-    //c2.width = la_toile.width;
-    //c2.height = la_toile.height;
-    //const id2 = ctx2.createImageData(la_toile.width, la_toile.height);
-    //for(let x = 0; x < c2.width; x++){
-    //    for(let y = 0; y < c2.height; y++){
-    //        const pixel = le_directeur_pour_la_image.getPixel(x, y);
-    //        id2.data[y * (c2.width * 4) + x * 4] = pixel.getRed();
-    //        id2.data[y * (c2.width * 4) + x * 4 + 1] = pixel.getGreen();
-    //        id2.data[y * (c2.width * 4) + x * 4 + 2] = pixel.getBlue();
-    //        id2.data[y * (c2.width * 4) + x * 4 + 3] = pixel.getAlpha();
-    //    }
-    //}
-    //ctx2.putImageData(id2, 0, 0);
-    //---
 };
 
 const loadImage = image_file => {
